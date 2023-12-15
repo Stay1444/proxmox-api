@@ -46,7 +46,7 @@ impl PveCluster {
     pub async fn status(&self) -> Result<PveClusterStatus, ProxmoxAPIError> {
         let url = self
             .host
-            .join("/api2/json/cluster/status") //TODO: Add request paramets.
+            .join("/api2/json/cluster/status")
             .expect("Correct URL");
 
         let response = self.
@@ -76,8 +76,10 @@ impl PveCluster {
         let response = self
             .client
             .get(url)
+            .form(&("type", resource))
             .send()
             .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
 
 
     }
