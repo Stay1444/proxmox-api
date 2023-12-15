@@ -178,4 +178,23 @@ impl PveNodes {
 
         Ok(())
     }
+
+    /// Gather various systems information about a node
+    pub async fn report(&self, node: impl Into<NodeId>) -> Result<String, ProxmoxAPIError> {
+        let node = node.into();
+
+        let url = self
+            .host
+            .join(&format!("/api2/json/nodes/{node}/report"))
+            .expect("Correct URL");
+
+        let response = self
+            .client
+            .get(url)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        Ok(PveResponse::from_response(response).await?.data)
+    }
 }
