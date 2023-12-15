@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use auth::ProxmoxAuthentication;
 use error::{ProxmoxAPIError, Result};
-use namespaces::nodes::PveNodes;
+use namespaces::{cluster::PveCluster, nodes::PveNodes};
 use reqwest::{
     header::{HeaderMap, HeaderValue},
     Url,
@@ -21,6 +21,7 @@ pub struct ProxmoxClient {
     client: reqwest::Client,
 
     pub nodes: PveNodes,
+    pub cluster: PveCluster,
 }
 
 impl ProxmoxClient {
@@ -47,6 +48,7 @@ impl ProxmoxClient {
             host: host.clone(),
             client: client.clone(),
             nodes: PveNodes::new(host.clone(), client.clone()),
+            cluster: PveCluster::new(host.clone(), client.clone()),
         }
     }
 
