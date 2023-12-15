@@ -4,6 +4,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use crate::error::ProxmoxAPIError;
 
 pub mod node;
+pub mod cluster;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub(crate) struct PveResponse<T> {
@@ -46,9 +47,37 @@ pub struct PveVersion {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
+pub enum PveType {
+    Cluster,
+    Node
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
 pub enum PveConsoleViewer {
     Applet,
     VV,
     Html5,
     XTermJS,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum AdvancedPveResourceType {
+    Node,
+    Storage,
+    Pool,
+    Qemu,
+    Lxc,
+    OpenVZ,
+    Sdn
+}
+#[derive(Serialize, Deserialize, D
+ebug)]
+#[serde(rename_all = "lowercase")]
+pub enum PveResourceType {
+    VM,
+    Storage,
+    Node,
+    Sdn
 }
