@@ -18,8 +18,8 @@ async fn main() {
 
     let client = ProxmoxClient::new("https://172.10.0.2:8006".parse().unwrap(), auth);
 
-    dbg!(client.nodes.version("avc01").await.unwrap());
-    dbg!(client.nodes.time("avc01").await.unwrap());
+    let node = client.nodes.get("avc01");
 
-    client.nodes.start_all("avc04", true).await;
+    dbg!(node.version().await.unwrap());
+    dbg!(node.time().await.unwrap());
 }

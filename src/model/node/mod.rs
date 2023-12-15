@@ -7,6 +7,7 @@ pub struct Time {
     pub timezone: String, // Time zone
 }
 
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct NodeId(pub(crate) String);
 
 impl NodeId {

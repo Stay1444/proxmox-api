@@ -18,12 +18,32 @@ impl PveNodes {
         Self { client, host }
     }
 
+    pub fn get(&self, node: impl Into<NodeId>) -> PveNode {
+        PveNode {
+            id: node.into(),
+            host: self.host.clone(),
+            client: self.client.clone(),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct PveNode {
+    id: NodeId,
+    host: Arc<Url>,
+    client: Client,
+}
+
+impl PveNode {
+    pub fn id(&self) -> NodeId {
+        self.id.clone()
+    }
+
     /// Try to wake a node via 'wake on LAN' network packet.
-    pub async fn wake_on_lan(&self, node: impl Into<NodeId>) -> Result<(), ProxmoxAPIError> {
-        let node = node.into();
+    pub async fn wake_on_lan(&self) -> Result<(), ProxmoxAPIError> {
         let url = self
             .host
-            .join(&format!("/api2/json/nodes/{node}/wakeonlan"))
+            .join(&format!("/api2/json/nodes/{}/wakeonlan", self.id))
             .expect("Correct URL");
 
         let response = self
@@ -44,11 +64,10 @@ impl PveNodes {
     }
 
     /// API version details
-    pub async fn version(&self, node: impl Into<NodeId>) -> Result<PveVersion, ProxmoxAPIError> {
-        let node = node.into();
+    pub async fn version(&self) -> Result<PveVersion, ProxmoxAPIError> {
         let url = self
             .host
-            .join(&format!("/api2/json/nodes/{node}/version"))
+            .join(&format!("/api2/json/nodes/{}/version", self.id))
             .expect("Correct URL");
 
         let response = self
@@ -61,14 +80,10 @@ impl PveNodes {
         Ok(PveResponse::from_response(response).await?.data)
     }
 
-    pub async fn time(
-        &self,
-        node: impl Into<NodeId>,
-    ) -> Result<model::node::Time, ProxmoxAPIError> {
-        let node = node.into();
+    pub async fn time(&self) -> Result<model::node::Time, ProxmoxAPIError> {
         let url = self
             .host
-            .join(&format!("/api2/json/nodes/{node}/time"))
+            .join(&format!("/api2/json/nodes/{}/time", self.id))
             .expect("Correct URL");
 
         let response = self
@@ -82,12 +97,10 @@ impl PveNodes {
     }
 
     /// Suspend all VMs.
-    pub async fn suspend_all(&self, node: impl Into<NodeId>) -> Result<(), ProxmoxAPIError> {
-        let node = node.into();
-
+    pub async fn suspend_all(&self) -> Result<(), ProxmoxAPIError> {
         let url = self
             .host
-            .join(&format!("/api2/json/nodes/{node}/suspendall"))
+            .join(&format!("/api2/json/nodes/{}/suspendall", self.id.clone()))
             .expect("Correct URL");
 
         let response = self
@@ -110,15 +123,12 @@ impl PveNodes {
     /// Stop all VMs and Containers.
     pub async fn stop_all(
         &self,
-        node: impl Into<NodeId>,
         force: bool,
         timeout: Option<Duration>,
     ) -> Result<(), ProxmoxAPIError> {
-        let node = node.into();
-
         let url = self
             .host
-            .join(&format!("/api2/json/nodes/{node}/stopall"))
+            .join(&format!("/api2/json/nodes/{}/stopall", self.id))
             .expect("Correct URL");
 
         let body = serde_json::json!({
@@ -145,16 +155,10 @@ impl PveNodes {
     }
 
     /// Start all VMs and containers located on this node (by default only those with onboot=1).
-    pub async fn start_all(
-        &self,
-        node: impl Into<NodeId>,
-        force: bool,
-    ) -> Result<(), ProxmoxAPIError> {
-        let node = node.into();
-
+    pub async fn start_all(&self, force: bool) -> Result<(), ProxmoxAPIError> {
         let url = self
             .host
-            .join(&format!("/api2/json/nodes/{node}/startall"))
+            .join(&format!("/api2/json/nodes/{}/startall", self.id))
             .expect("Correct URL");
 
         let body = serde_json::json!({
@@ -180,12 +184,10 @@ impl PveNodes {
     }
 
     /// Gather various systems information about a node
-    pub async fn report(&self, node: impl Into<NodeId>) -> Result<String, ProxmoxAPIError> {
-        let node = node.into();
-
+    pub async fn report(&self) -> Result<String, ProxmoxAPIError> {
         let url = self
             .host
-            .join(&format!("/api2/json/nodes/{node}/report"))
+            .join(&format!("/api2/json/nodes/{}/report", self.id))
             .expect("Correct URL");
 
         let response = self
