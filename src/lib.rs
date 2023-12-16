@@ -2,7 +2,8 @@ use std::sync::Arc;
 
 use auth::ProxmoxAuthentication;
 use error::{ProxmoxAPIError, Result};
-use namespaces::{cluster::PveCluster, nodes::PveNodes};
+use model::node::NodeId;
+use namespaces::{cluster::PveCluster, nodes::PveNode};
 use reqwest::{
     header::{HeaderMap, HeaderValue},
     Url,
@@ -20,7 +21,6 @@ pub struct ProxmoxClient {
     host: Arc<Url>,
     client: reqwest::Client,
 
-    pub nodes: PveNodes,
     pub cluster: PveCluster,
 }
 
@@ -47,7 +47,6 @@ impl ProxmoxClient {
         Self {
             host: host.clone(),
             client: client.clone(),
-            nodes: PveNodes::new(host.clone(), client.clone()),
             cluster: PveCluster::new(host.clone(), client.clone()),
         }
     }
@@ -62,5 +61,9 @@ impl ProxmoxClient {
             .map_err(|_| ProxmoxAPIError::NetworkError)?;
 
         Ok(PveResponse::from_response(response).await?.data)
+    }
+
+    pub fn node(&self, id: impl Into<NodeId>) -> PveNode {
+        PveNode::new(id.into(), self.host.clone(), self.client.clone())
     }
 }

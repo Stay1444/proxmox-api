@@ -8,26 +8,6 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub struct PveNodes {
-    host: Arc<Url>,
-    client: Client,
-}
-
-impl PveNodes {
-    pub fn new(host: Arc<Url>, client: Client) -> Self {
-        Self { client, host }
-    }
-
-    pub fn get(&self, node: impl Into<NodeId>) -> PveNode {
-        PveNode {
-            id: node.into(),
-            host: self.host.clone(),
-            client: self.client.clone(),
-        }
-    }
-}
-
-#[derive(Clone)]
 pub struct PveNode {
     id: NodeId,
     host: Arc<Url>,
@@ -35,6 +15,10 @@ pub struct PveNode {
 }
 
 impl PveNode {
+    pub(crate) fn new(id: NodeId, host: Arc<Url>, client: Client) -> Self {
+        Self { id, host, client }
+    }
+
     pub fn id(&self) -> NodeId {
         self.id.clone()
     }
