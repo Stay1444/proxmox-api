@@ -298,4 +298,39 @@ impl PveNode {
 
         Ok(PveResponse::from_response(response).await?.data)
     }
+
+    /// Execute multiple commands in order, root only.
+    pub async fn execute(
+        &self,
+        commands: &[model::node::execute::Command],
+    ) -> Result<(), ProxmoxAPIError> {
+        let url = self
+            .host
+            .join(&format!("/api2/json/nodes/{}/execute", self.id))
+            .expect("Correct URL");
+
+        let commands_as_json =
+            serde_json::to_string(&commands).expect("Correct serialization of &[Command]");
+
+        let body = serde_json::json!({
+            "commands": commands_as_json
+        });
+
+        let response = self
+            .client
+            .post(url)
+            .json(&body)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        if !response.status().is_success() {
+            match response.status() {
+                StatusCode::UNAUTHORIZED => return Err(ProxmoxAPIError::Unauthorized),
+                _ => return Err(ProxmoxAPIError::ApiError),
+            }
+        }
+
+        Ok(())
+    }
 }
