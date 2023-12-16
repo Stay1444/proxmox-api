@@ -375,4 +375,23 @@ impl PveNode {
 
         Ok(PveResponse::from_response(response).await?.data)
     }
+
+    /// Get list of appliances.
+    pub async fn apl_info(
+        &self,
+    ) -> Result<Vec<model::node::aplinfo::ApplianceInformation>, ProxmoxAPIError> {
+        let url = self
+            .host
+            .join(&format!("/api2/json/nodes/{}/aplinfo", self.id))
+            .expect("Correct URL");
+
+        let response = self
+            .client
+            .get(url)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        Ok(PveResponse::from_response(response).await?.data)
+    }
 }
