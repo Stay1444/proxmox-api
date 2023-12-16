@@ -1,11 +1,10 @@
-
 use crate::error::ProxmoxAPIError;
 use crate::model::cluster::resources::PveClusterResource;
 use crate::model::cluster::status::PveClusterStatus;
 use crate::model::{PveResourceType, PveResponse};
 use reqwest::{Client, StatusCode, Url};
-use std::sync::Arc;
 use serde_json::Value;
+use std::sync::Arc;
 
 pub mod sdn;
 
@@ -114,7 +113,7 @@ impl PveCluster {
             return match response.status() {
                 StatusCode::UNAUTHORIZED => Err(ProxmoxAPIError::Unauthorized),
                 _ => Err(ProxmoxAPIError::ApiError),
-            }
+            };
         }
 
         Ok(PveResponse::from_response(response).await?.data)
@@ -137,7 +136,7 @@ impl PveCluster {
             return match response.status() {
                 StatusCode::UNAUTHORIZED => Err(ProxmoxAPIError::Unauthorized),
                 _ => Err(ProxmoxAPIError::ApiError),
-            }
+            };
         }
 
         Ok(PveResponse::from_response(response).await?.data)
@@ -151,7 +150,7 @@ impl PveCluster {
 
         let response = self
             .client
-            .get(&url)
+            .get(url)
             .send()
             .await
             .map_err(|_| ProxmoxAPIError::NetworkError)?;
@@ -160,11 +159,9 @@ impl PveCluster {
             return match response.status() {
                 StatusCode::UNAUTHORIZED => Err(ProxmoxAPIError::Unauthorized),
                 _ => Err(ProxmoxAPIError::ApiError),
-            }
+            };
         }
 
         Ok(PveResponse::from_response(response).await?.data)
     }
-
 }
-

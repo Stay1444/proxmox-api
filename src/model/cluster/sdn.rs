@@ -1,24 +1,23 @@
 use serde::{Deserialize, Serialize};
-use serde::de::Unexpected::Option;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum SdnControllerType {
     BGP,
-    eVPN,
+    EVPN,
     Faucet,
-    Isis
+    Isis,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum SdnZoneType {
-    eVPN,
+    EVPN,
     Faucet,
     QINQ,
     Simple,
     Vlan,
-    Vxlan
+    Vxlan,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -26,7 +25,7 @@ pub enum SdnZoneType {
 pub enum SdnIpamType {
     Netbox,
     Phpipam,
-    Pve
+    Pve,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -35,21 +34,21 @@ pub struct SdnController {
     #[serde(rename = "type")]
     pub controller_type: String,
     pub pending: Option<String>, //Display pending config
-    pub state: Option<String>
+    pub state: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SdnDNS {
     pub dns: String,
     #[serde(rename = "type")]
-    pub dns_type: String
+    pub dns_type: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SdnIpam {
     pub ipam: String,
     #[serde(rename = "type")]
-    pub ipam_type: String
+    pub ipam_type: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -65,8 +64,5 @@ pub struct SdnZone {
     pub nodes: Option<String>,
     pub pending: Option<String>, //Display pending config
     pub reversedns: Option<String>,
-    pub state: Option<String>
+    pub state: Option<String>,
 }
-
-
-
