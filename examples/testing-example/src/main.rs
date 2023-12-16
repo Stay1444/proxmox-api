@@ -18,5 +18,9 @@ async fn main() {
 
     let client = ProxmoxClient::new("https://172.10.0.2:8006".parse().unwrap(), auth);
 
-    dbg!(client.nodes().await);
+    for node in client.nodes().await.unwrap() {
+        println!("----");
+        println!("Name: {}", node.id);
+        println!("Status: {}", node.status);
+    }
 }

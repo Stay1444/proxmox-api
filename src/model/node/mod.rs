@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::Deserialize;
 
 pub mod aplinfo;
@@ -14,7 +16,8 @@ pub mod vzdump;
 
 #[derive(Deserialize, Debug)]
 pub struct PveNodeInformation {
-    pub node: String,
+    #[serde(rename = "node")]
+    pub id: String,
     pub status: NodeStatus,
     #[serde(default)]
     pub cpu: Option<f64>,
@@ -38,6 +41,16 @@ pub enum NodeStatus {
     Unknown,
     Online,
     Offline,
+}
+
+impl Display for NodeStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Unknown => write!(f, "Unknown"),
+            Self::Online => write!(f, "Online"),
+            Self::Offline => write!(f, "Offline"),
+        }
+    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
