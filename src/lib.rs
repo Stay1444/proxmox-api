@@ -66,4 +66,17 @@ impl ProxmoxClient {
     pub fn node(&self, id: impl Into<NodeId>) -> PveNode {
         PveNode::new(id.into(), self.host.clone(), self.client.clone())
     }
+
+    /// Cluster node index.
+    pub async fn nodes(&self) -> Result<Vec<model::node::PveNodeInformation>> {
+        let url = self.host.join("/api2/json/nodes").expect("Correct URL");
+        let response = self
+            .client
+            .get(url)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        Ok(PveResponse::from_response(response).await?.data)
+    }
 }

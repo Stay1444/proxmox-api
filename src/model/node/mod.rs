@@ -1,3 +1,5 @@
+use serde::Deserialize;
+
 pub mod aplinfo;
 pub mod config;
 pub mod dns;
@@ -7,7 +9,36 @@ pub mod netstat;
 pub mod time;
 pub mod url_metadata;
 
+pub mod tasks;
 pub mod vzdump;
+
+#[derive(Deserialize, Debug)]
+pub struct PveNodeInformation {
+    pub node: String,
+    pub status: NodeStatus,
+    #[serde(default)]
+    pub cpu: Option<f64>,
+    #[serde(default)]
+    pub level: Option<String>,
+    #[serde(default, rename = "maxcpu")]
+    pub max_cpu: Option<i64>,
+    #[serde(default, rename = "maxmem")]
+    pub max_mem: Option<i64>,
+    #[serde(default)]
+    pub mem: Option<i64>,
+    #[serde(default)]
+    pub ssl_fingerprint: Option<String>,
+    #[serde(default)]
+    pub uptime: Option<i64>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum NodeStatus {
+    Unknown,
+    Online,
+    Offline,
+}
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct NodeId(pub(crate) String);

@@ -7,6 +7,7 @@ use crate::{
     model::{self, node::NodeId, PveResponse, PveVersion},
 };
 
+mod tasks;
 mod vzdump;
 
 #[derive(Clone)]
@@ -15,6 +16,7 @@ pub struct PveNode {
     host: Arc<Url>,
     client: Client,
     pub vzdump: vzdump::VZDump,
+    pub tasks: tasks::Tasks,
 }
 
 impl PveNode {
@@ -24,6 +26,7 @@ impl PveNode {
             host: host.clone(),
             client: client.clone(),
             vzdump: vzdump::VZDump::new(id.clone(), host.clone(), client.clone()),
+            tasks: tasks::Tasks::new(id.clone(), host.clone(), client.clone()),
         }
     }
 
@@ -371,6 +374,36 @@ impl PveNode {
         let response = self
             .client
             .get(url)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        Ok(PveResponse::from_response(response).await?.data)
+    }
+
+    /// Read task list for one node (finished tasks).
+    ///
+    /// You can apply a filter like this:
+    /// ```
+    /// node.tasks(filter: Some(GetTasksFilter {
+    ///     only_errors: Some(true),
+    ///     ..Default::default()
+    /// }));
+    /// ```
+    ///
+    pub async fn tasks(
+        &self,
+        filter: Option<model::node::tasks::GetTasksFilter>,
+    ) -> Result<Vec<model::node::tasks::Task>> {
+        let url = self
+            .host
+            .join(&format!("/api2/json/nodes/{}/tasks", self.id))
+            .expect("Correct URL");
+
+        let response = self
+            .client
+            .get(url)
+            .json(&filter)
             .send()
             .await
             .map_err(|_| ProxmoxAPIError::NetworkError)?;
