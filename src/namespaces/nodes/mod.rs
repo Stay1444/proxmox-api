@@ -350,4 +350,29 @@ impl PveNode {
 
         Ok(PveResponse::from_response(response).await?.data)
     }
+
+    /// Get node configuration options.
+    pub async fn config(
+        &self,
+        property: Option<model::node::config::Property>,
+    ) -> Result<model::node::config::NodeConfiguration, ProxmoxAPIError> {
+        let url = self
+            .host
+            .join(&format!("/api2/json/nodes/{}/config", self.id))
+            .expect("Correct URL");
+
+        let body = serde_json::json!({
+            "property": property
+        });
+
+        let response = self
+            .client
+            .get(url)
+            .json(&body)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        Ok(PveResponse::from_response(response).await?.data)
+    }
 }
