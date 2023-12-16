@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+pub mod url_metadata;
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Time {
     pub localtime: i64,   // Seconds since 1970-01-01 00:00:00 (local time)

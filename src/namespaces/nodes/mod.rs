@@ -4,7 +4,11 @@ use reqwest::{Client, StatusCode, Url};
 
 use crate::{
     error::ProxmoxAPIError,
-    model::{self, node::NodeId, PveResponse, PveVersion},
+    model::{
+        self,
+        node::{url_metadata::UrlMetadata, NodeId},
+        PveResponse, PveVersion,
+    },
 };
 
 #[derive(Clone)]
@@ -193,6 +197,35 @@ impl PveNode {
         let response = self
             .client
             .get(url)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        Ok(PveResponse::from_response(response).await?.data)
+    }
+
+    /// Query metadata of an URL: file size, file name and mime type.
+    pub async fn query_url_metadata(
+        &self,
+        url: Url,
+        verify_certs: bool,
+    ) -> Result<UrlMetadata, ProxmoxAPIError> {
+        let target = url.to_string();
+
+        let url = self
+            .host
+            .join(&format!("/api2/json/nodes/{}/query-url-metadata", self.id))
+            .expect("Correct URL");
+
+        let body = serde_json::json!({
+            "url": target,
+            "verify-certificates": verify_certs
+        });
+
+        let response = self
+            .client
+            .get(url)
+            .json(&body)
             .send()
             .await
             .map_err(|_| ProxmoxAPIError::NetworkError)?;
