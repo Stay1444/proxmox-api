@@ -333,4 +333,21 @@ impl PveNode {
 
         Ok(())
     }
+
+    /// Read DNS settings.
+    pub async fn dns(&self) -> Result<model::node::dns::DnsSettings, ProxmoxAPIError> {
+        let url = self
+            .host
+            .join(&format!("/api2/json/nodes/{}/dns", self.id))
+            .expect("Correct URL");
+
+        let response = self
+            .client
+            .get(url)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        Ok(PveResponse::from_response(response).await?.data)
+    }
 }

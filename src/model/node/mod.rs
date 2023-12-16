@@ -1,3 +1,4 @@
+pub mod dns;
 pub mod execute;
 pub mod hosts;
 pub mod netstat;
