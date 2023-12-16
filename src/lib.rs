@@ -12,6 +12,7 @@ use reqwest::{
 use crate::model::PveResponse;
 
 pub mod auth;
+mod deserializers;
 pub mod error;
 pub mod model;
 mod namespaces;

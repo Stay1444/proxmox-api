@@ -8,12 +8,21 @@ pub struct GetTasksFilter {
     pub since: Option<u64>,
     pub source: Option<TaskSource>,
     pub start: Option<u64>,
-    #[serde(rename = "statusfilter")]
+    #[serde(
+        rename = "statusfilter",
+        deserialize_with = "crate::deserializers::non_empty_str"
+    )]
     pub status_filter: Option<String>,
-    #[serde(rename = "typefilter")]
+    #[serde(
+        rename = "typefilter",
+        deserialize_with = "crate::deserializers::non_empty_str"
+    )]
     pub type_filter: Option<String>,
     pub until: Option<u64>,
-    #[serde(rename = "userfilter")]
+    #[serde(
+        rename = "userfilter",
+        deserialize_with = "crate::deserializers::non_empty_str"
+    )]
     pub user_filter: Option<String>,
     pub vmid: Option<u64>,
 }
@@ -57,7 +66,7 @@ pub struct Task {
     pub user: String,
     #[serde(default)]
     pub end_time: Option<u64>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "crate::deserializers::non_empty_str")]
     pub status: Option<String>,
 }
 
@@ -73,7 +82,11 @@ pub struct TaskStatus {
     pub task_type: String,
     pub upid: String,
     pub user: String,
-    #[serde(default, rename = "exitstatus")]
+    #[serde(
+        default,
+        rename = "exitstatus",
+        deserialize_with = "crate::deserializers::non_empty_str"
+    )]
     pub exit_status: Option<String>,
 }
 

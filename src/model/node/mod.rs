@@ -18,7 +18,7 @@ pub struct PveNodeInformation {
     pub status: NodeStatus,
     #[serde(default)]
     pub cpu: Option<f64>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "crate::deserializers::non_empty_str")]
     pub level: Option<String>,
     #[serde(default, rename = "maxcpu")]
     pub max_cpu: Option<i64>,
