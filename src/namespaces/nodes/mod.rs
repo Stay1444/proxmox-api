@@ -3,20 +3,28 @@ use std::{sync::Arc, time::Duration};
 use reqwest::{Client, StatusCode, Url};
 
 use crate::{
-    error::ProxmoxAPIError,
+    error::{ProxmoxAPIError, Result},
     model::{self, node::NodeId, PveResponse, PveVersion},
 };
+
+mod vzdump;
 
 #[derive(Clone)]
 pub struct PveNode {
     id: NodeId,
     host: Arc<Url>,
     client: Client,
+    pub vzdump: vzdump::VZDump,
 }
 
 impl PveNode {
     pub(crate) fn new(id: NodeId, host: Arc<Url>, client: Client) -> Self {
-        Self { id, host, client }
+        Self {
+            id: id.clone(),
+            host: host.clone(),
+            client: client.clone(),
+            vzdump: vzdump::VZDump::new(id.clone(), host.clone(), client.clone()),
+        }
     }
 
     pub fn id(&self) -> NodeId {
@@ -24,7 +32,7 @@ impl PveNode {
     }
 
     /// Try to wake a node via 'wake on LAN' network packet.
-    pub async fn wake_on_lan(&self) -> Result<(), ProxmoxAPIError> {
+    pub async fn wake_on_lan(&self) -> Result<()> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/wakeonlan", self.id))
@@ -48,7 +56,7 @@ impl PveNode {
     }
 
     /// API version details
-    pub async fn version(&self) -> Result<PveVersion, ProxmoxAPIError> {
+    pub async fn version(&self) -> Result<PveVersion> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/version", self.id))
@@ -64,7 +72,7 @@ impl PveNode {
         Ok(PveResponse::from_response(response).await?.data)
     }
 
-    pub async fn time(&self) -> Result<model::node::time::Time, ProxmoxAPIError> {
+    pub async fn time(&self) -> Result<model::node::time::Time> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/time", self.id))
@@ -81,7 +89,7 @@ impl PveNode {
     }
 
     /// Suspend all VMs.
-    pub async fn suspend_all(&self) -> Result<(), ProxmoxAPIError> {
+    pub async fn suspend_all(&self) -> Result<()> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/suspendall", self.id.clone()))
@@ -105,11 +113,7 @@ impl PveNode {
     }
 
     /// Stop all VMs and Containers.
-    pub async fn stop_all(
-        &self,
-        force: bool,
-        timeout: Option<Duration>,
-    ) -> Result<(), ProxmoxAPIError> {
+    pub async fn stop_all(&self, force: bool, timeout: Option<Duration>) -> Result<()> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/stopall", self.id))
@@ -139,7 +143,7 @@ impl PveNode {
     }
 
     /// Start all VMs and containers located on this node (by default only those with onboot=1).
-    pub async fn start_all(&self, force: bool) -> Result<(), ProxmoxAPIError> {
+    pub async fn start_all(&self, force: bool) -> Result<()> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/startall", self.id))
@@ -168,7 +172,7 @@ impl PveNode {
     }
 
     /// Gather various systems information about a node
-    pub async fn report(&self) -> Result<String, ProxmoxAPIError> {
+    pub async fn report(&self) -> Result<String> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/report", self.id))
@@ -189,7 +193,7 @@ impl PveNode {
         &self,
         url: Url,
         verify_certs: bool,
-    ) -> Result<model::node::url_metadata::UrlMetadata, ProxmoxAPIError> {
+    ) -> Result<model::node::url_metadata::UrlMetadata> {
         let target = url.to_string();
 
         let url = self
@@ -214,7 +218,7 @@ impl PveNode {
     }
 
     /// Read tap/vm network device interface counters
-    pub async fn netstat(&self) -> Result<model::node::netstat::NetStat, ProxmoxAPIError> {
+    pub async fn netstat(&self) -> Result<model::node::netstat::NetStat> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/netstat", self.id))
@@ -236,7 +240,7 @@ impl PveNode {
         target: NodeId,
         with_local_disks: bool,
         max_workers: Option<u32>,
-    ) -> Result<(), ProxmoxAPIError> {
+    ) -> Result<()> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/migrateall", self.id))
@@ -267,7 +271,7 @@ impl PveNode {
     }
 
     /// Get the content of /etc/hosts.
-    pub async fn hosts(&self) -> Result<model::node::hosts::Hosts, ProxmoxAPIError> {
+    pub async fn hosts(&self) -> Result<model::node::hosts::Hosts> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/hosts", self.id))
@@ -284,10 +288,7 @@ impl PveNode {
     }
 
     /// Execute multiple commands in order, root only.
-    pub async fn execute(
-        &self,
-        commands: &[model::node::execute::Command],
-    ) -> Result<(), ProxmoxAPIError> {
+    pub async fn execute(&self, commands: &[model::node::execute::Command]) -> Result<()> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/execute", self.id))
@@ -319,7 +320,7 @@ impl PveNode {
     }
 
     /// Read DNS settings.
-    pub async fn dns(&self) -> Result<model::node::dns::DnsSettings, ProxmoxAPIError> {
+    pub async fn dns(&self) -> Result<model::node::dns::DnsSettings> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/dns", self.id))
@@ -339,7 +340,7 @@ impl PveNode {
     pub async fn config(
         &self,
         property: Option<model::node::config::Property>,
-    ) -> Result<model::node::config::NodeConfiguration, ProxmoxAPIError> {
+    ) -> Result<model::node::config::NodeConfiguration> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/config", self.id))
@@ -361,9 +362,7 @@ impl PveNode {
     }
 
     /// Get list of appliances.
-    pub async fn apl_info(
-        &self,
-    ) -> Result<Vec<model::node::aplinfo::ApplianceInformation>, ProxmoxAPIError> {
+    pub async fn apl_info(&self) -> Result<Vec<model::node::aplinfo::ApplianceInformation>> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/aplinfo", self.id))

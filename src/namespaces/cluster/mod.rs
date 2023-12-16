@@ -1,4 +1,4 @@
-use crate::error::ProxmoxAPIError;
+use crate::error::{ProxmoxAPIError, Result};
 use crate::model::cluster::resources::PveClusterResource;
 use crate::model::cluster::status::PveClusterStatus;
 use crate::model::{PveResourceType, PveResponse};
@@ -19,7 +19,7 @@ impl PveCluster {
         Self { client, host }
     }
 
-    pub async fn tasks(&self) -> Result<Vec<String>, ProxmoxAPIError> {
+    pub async fn tasks(&self) -> Result<Vec<String>> {
         let url = self
             .host
             .join("/api2/json/cluster/tasks")
@@ -42,7 +42,7 @@ impl PveCluster {
         Ok(PveResponse::from_response(response).await?.data)
     }
 
-    pub async fn status(&self) -> Result<Vec<PveClusterStatus>, ProxmoxAPIError> {
+    pub async fn status(&self) -> Result<Vec<PveClusterStatus>> {
         let url = self
             .host
             .join("/api2/json/cluster/status")
@@ -65,10 +65,7 @@ impl PveCluster {
         Ok(PveResponse::from_response(response).await?.data)
     }
 
-    pub async fn resources(
-        &self,
-        resource: PveResourceType,
-    ) -> Result<Vec<PveClusterResource>, ProxmoxAPIError> {
+    pub async fn resources(&self, resource: PveResourceType) -> Result<Vec<PveClusterResource>> {
         let url = self
             .host
             .join("/api2/json/cluster/resources")
@@ -96,7 +93,7 @@ impl PveCluster {
         Ok(PveResponse::from_response(response).await?.data)
     }
 
-    pub async fn options(&self) -> Result<Value, ProxmoxAPIError> {
+    pub async fn options(&self) -> Result<Value> {
         let url = self
             .host
             .join("/api2/json/cluster/options")
@@ -119,7 +116,7 @@ impl PveCluster {
         Ok(PveResponse::from_response(response).await?.data)
     }
 
-    pub async fn next_id(&self) -> Result<i32, ProxmoxAPIError> {
+    pub async fn next_id(&self) -> Result<i32> {
         let url = self
             .host
             .join("/api2/json/cluster/nextid")
@@ -142,7 +139,7 @@ impl PveCluster {
         Ok(PveResponse::from_response(response).await?.data)
     }
 
-    pub async fn log(&self) -> Result<Vec<Value>, ProxmoxAPIError> {
+    pub async fn log(&self) -> Result<Vec<Value>> {
         let url = self
             .host
             .join("/api2/json/cluster/log")
