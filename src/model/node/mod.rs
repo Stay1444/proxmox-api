@@ -7,6 +7,8 @@ pub mod netstat;
 pub mod time;
 pub mod url_metadata;
 
+pub mod vzdump;
+
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct NodeId(pub(crate) String);
 
