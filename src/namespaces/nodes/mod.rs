@@ -281,4 +281,21 @@ impl PveNode {
 
         Ok(())
     }
+
+    /// Get the content of /etc/hosts.
+    pub async fn hosts(&self) -> Result<model::node::hosts::Hosts, ProxmoxAPIError> {
+        let url = self
+            .host
+            .join(&format!("/api2/json/nodes/{}/hosts", self.id))
+            .expect("Correct URL");
+
+        let response = self
+            .client
+            .get(url)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        Ok(PveResponse::from_response(response).await?.data)
+    }
 }

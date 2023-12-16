@@ -1,3 +1,4 @@
+pub mod hosts;
 pub mod netstat;
 pub mod time;
 pub mod url_metadata;
