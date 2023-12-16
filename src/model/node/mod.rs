@@ -1,13 +1,6 @@
-use serde::{Deserialize, Serialize};
-
+pub mod netstat;
+pub mod time;
 pub mod url_metadata;
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Time {
-    pub localtime: i64,   // Seconds since 1970-01-01 00:00:00 (local time)
-    pub time: i64,        // Seconds since 1970-01-01 00:00:00 UTC.
-    pub timezone: String, // Time zone
-}
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct NodeId(pub(crate) String);

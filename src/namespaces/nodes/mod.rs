@@ -4,11 +4,7 @@ use reqwest::{Client, StatusCode, Url};
 
 use crate::{
     error::ProxmoxAPIError,
-    model::{
-        self,
-        node::{url_metadata::UrlMetadata, NodeId},
-        PveResponse, PveVersion,
-    },
+    model::{self, node::NodeId, PveResponse, PveVersion},
 };
 
 #[derive(Clone)]
@@ -84,7 +80,7 @@ impl PveNode {
         Ok(PveResponse::from_response(response).await?.data)
     }
 
-    pub async fn time(&self) -> Result<model::node::Time, ProxmoxAPIError> {
+    pub async fn time(&self) -> Result<model::node::time::Time, ProxmoxAPIError> {
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/time", self.id))
@@ -209,7 +205,7 @@ impl PveNode {
         &self,
         url: Url,
         verify_certs: bool,
-    ) -> Result<UrlMetadata, ProxmoxAPIError> {
+    ) -> Result<model::node::url_metadata::UrlMetadata, ProxmoxAPIError> {
         let target = url.to_string();
 
         let url = self
@@ -231,5 +227,58 @@ impl PveNode {
             .map_err(|_| ProxmoxAPIError::NetworkError)?;
 
         Ok(PveResponse::from_response(response).await?.data)
+    }
+
+    /// Read tap/vm network device interface counters
+    pub async fn netstat(&self) -> Result<model::node::netstat::NetStat, ProxmoxAPIError> {
+        let url = self
+            .host
+            .join(&format!("/api2/json/nodes/{}/netstat", self.id))
+            .expect("Correct URL");
+
+        let response = self
+            .client
+            .get(url)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        Ok(PveResponse::from_response(response).await?.data)
+    }
+
+    /// Migrate all VMs and Containers.
+    pub async fn migrate_all(
+        &self,
+        target: NodeId,
+        with_local_disks: bool,
+        max_workers: Option<u32>,
+    ) -> Result<(), ProxmoxAPIError> {
+        let url = self
+            .host
+            .join(&format!("/api2/json/nodes/{}/migrateall", self.id))
+            .expect("Correct URL");
+
+        let body = serde_json::json!({
+            "target": target.to_string(),
+            "maxworkers": max_workers,
+            "with-local-disks": with_local_disks
+        });
+
+        let response = self
+            .client
+            .post(url)
+            .json(&body)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        if !response.status().is_success() {
+            match response.status() {
+                StatusCode::UNAUTHORIZED => return Err(ProxmoxAPIError::Unauthorized),
+                _ => return Err(ProxmoxAPIError::ApiError),
+            }
+        }
+
+        Ok(())
     }
 }
