@@ -35,7 +35,7 @@ impl PveCluster {
         if !response.status().is_success() {
             match response.status() {
                 StatusCode::UNAUTHORIZED => return Err(ProxmoxAPIError::Unauthorized),
-                _ => return Err(ProxmoxAPIError::ApiError),
+                status => return Err(ProxmoxAPIError::ApiError(status)),
             }
         }
 
@@ -58,7 +58,7 @@ impl PveCluster {
         if !response.status().is_success() {
             match response.status() {
                 StatusCode::UNAUTHORIZED => return Err(ProxmoxAPIError::Unauthorized),
-                _ => return Err(ProxmoxAPIError::ApiError),
+                status => return Err(ProxmoxAPIError::ApiError(status)),
             }
         }
 
@@ -86,7 +86,7 @@ impl PveCluster {
         if !response.status().is_success() {
             match response.status() {
                 StatusCode::UNAUTHORIZED => return Err(ProxmoxAPIError::Unauthorized),
-                _ => return Err(ProxmoxAPIError::ApiError),
+                status => return Err(ProxmoxAPIError::ApiError(status)),
             }
         }
 
@@ -109,7 +109,7 @@ impl PveCluster {
         if !response.status().is_success() {
             return match response.status() {
                 StatusCode::UNAUTHORIZED => Err(ProxmoxAPIError::Unauthorized),
-                _ => Err(ProxmoxAPIError::ApiError),
+                status => return Err(ProxmoxAPIError::ApiError(status)),
             };
         }
 
@@ -132,7 +132,7 @@ impl PveCluster {
         if !response.status().is_success() {
             return match response.status() {
                 StatusCode::UNAUTHORIZED => Err(ProxmoxAPIError::Unauthorized),
-                _ => Err(ProxmoxAPIError::ApiError),
+                status => return Err(ProxmoxAPIError::ApiError(status)),
             };
         }
 
@@ -155,7 +155,7 @@ impl PveCluster {
         if !response.status().is_success() {
             return match response.status() {
                 StatusCode::UNAUTHORIZED => Err(ProxmoxAPIError::Unauthorized),
-                _ => Err(ProxmoxAPIError::ApiError),
+                status => return Err(ProxmoxAPIError::ApiError(status)),
             };
         }
 

@@ -1,3 +1,4 @@
+use reqwest::StatusCode;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -9,7 +10,7 @@ pub enum ProxmoxAPIError {
     #[error("Unauthorized")]
     Unauthorized,
     #[error("Unknown API error")]
-    ApiError,
+    ApiError(StatusCode),
 }
 
 pub type Result<T> = core::result::Result<T, ProxmoxAPIError>;

@@ -21,5 +21,5 @@ async fn main() {
     let node = client.node("avc01");
 
     dbg!(node.version().await.unwrap());
-    dbg!(node.time().await.unwrap());
+    dbg!(node.vzdump.defaults(None).await);
 }
