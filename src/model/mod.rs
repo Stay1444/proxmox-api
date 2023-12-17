@@ -69,3 +69,21 @@ pub enum PveResourceType {
     Node,
     Sdn,
 }
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum PveResourceOrigin {
+    #[serde(rename = "user-created")]
+    UserCreated,
+    Builtin,
+    #[serde(rename = "modified-builtin")]
+    ModifiedBuiltIn
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum PveEncryptMode {
+    Insecure,
+    StartTls,
+    Tls
+}
