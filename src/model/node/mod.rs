@@ -11,6 +11,7 @@ pub mod netstat;
 pub mod time;
 pub mod url_metadata;
 
+pub mod lxc;
 pub mod tasks;
 pub mod vzdump;
 

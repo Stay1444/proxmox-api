@@ -1,5 +1,6 @@
 use reqwest::{Response, StatusCode};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use tracing::error;
 
 use crate::error::ProxmoxAPIError;
 
@@ -32,7 +33,10 @@ where
 
         dbg!(&body);
 
-        serde_json::from_str(&body).map_err(|_| ProxmoxAPIError::DeserializationError)
+        serde_json::from_str(&body).map_err(|err| {
+            error!("{err}");
+            ProxmoxAPIError::DeserializationError
+        })
     }
 }
 
@@ -77,7 +81,7 @@ pub enum PveResourceOrigin {
     UserCreated,
     Builtin,
     #[serde(rename = "modified-builtin")]
-    ModifiedBuiltIn
+    ModifiedBuiltIn,
 }
 
 #[derive(Deserialize, Debug)]
@@ -85,5 +89,6 @@ pub enum PveResourceOrigin {
 pub enum PveEncryptMode {
     Insecure,
     StartTls,
-    Tls
+    Tls,
 }
+

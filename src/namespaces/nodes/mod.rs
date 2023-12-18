@@ -410,4 +410,20 @@ impl PveNode {
 
         Ok(PveResponse::from_response(response).await?.data)
     }
+
+    pub async fn lxcs(&self) -> Result<Vec<model::node::lxc::LXC>> {
+        let url = self
+            .host
+            .join(&format!("/api2/json/nodes/{}/lxc", self.id))
+            .expect("Correct URL");
+
+        let response = self
+            .client
+            .get(url)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        Ok(PveResponse::from_response(response).await?.data)
+    }
 }
