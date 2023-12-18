@@ -3,6 +3,7 @@ use std::sync::Arc;
 use reqwest::{Client, StatusCode, Url};
 
 use crate::error::{ProxmoxAPIError, Result};
+use crate::model;
 use crate::model::node::{NodeId, VMId};
 
 #[derive(Clone)]
@@ -43,6 +44,47 @@ impl PveLXC {
         let response = self
             .client
             .post(url)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        if !response.status().is_success() {
+            match response.status() {
+                StatusCode::UNAUTHORIZED => return Err(ProxmoxAPIError::Unauthorized),
+                status => return Err(ProxmoxAPIError::ApiError(status)),
+            }
+        }
+
+        Ok(())
+    }
+
+    pub async fn resize(
+        &self,
+        size: model::Size,
+        disk: impl Into<String>,
+        digest: Option<impl Into<String>>,
+    ) -> Result<()> {
+        let disk = disk.into();
+        let digest = digest.map(|x| x.into());
+
+        let url = self
+            .host
+            .join(&format!(
+                "/api2/json/nodes/{}/lxc{}/resize",
+                self.node_id, self.id
+            ))
+            .expect("Correct URL");
+
+        let body = serde_json::json!({
+            "disk": disk,
+            "size": size.to_string(),
+            "digest": digest
+        });
+
+        let response = self
+            .client
+            .post(url)
+            .json(&body)
             .send()
             .await
             .map_err(|_| ProxmoxAPIError::NetworkError)?;
