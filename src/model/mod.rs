@@ -51,13 +51,6 @@ pub struct PveVersion {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
-pub enum PveType {
-    Cluster,
-    Node,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "lowercase")]
 pub enum PveConsoleViewer {
     Applet,
     VV,
@@ -65,30 +58,10 @@ pub enum PveConsoleViewer {
     XTermJS,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "lowercase")]
-pub enum PveResourceType {
-    VM,
-    Storage,
-    Node,
-    Sdn,
+pub enum Size {
+    TB(i64),
+    GB(i64),
+    MB(i64),
+    KB(i64),
+    B(i64),
 }
-
-#[derive(Deserialize, Debug)]
-#[serde(rename_all = "lowercase")]
-pub enum PveResourceOrigin {
-    #[serde(rename = "user-created")]
-    UserCreated,
-    Builtin,
-    #[serde(rename = "modified-builtin")]
-    ModifiedBuiltIn,
-}
-
-#[derive(Deserialize, Debug)]
-#[serde(rename_all = "lowercase")]
-pub enum PveEncryptMode {
-    Insecure,
-    StartTls,
-    Tls,
-}
-

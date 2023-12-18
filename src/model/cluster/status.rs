@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::model::PveType;
+use super::PveType;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PveClusterStatus {

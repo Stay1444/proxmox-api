@@ -1,7 +1,8 @@
 use crate::error::{ProxmoxAPIError, Result};
 use crate::model::cluster::resources::PveClusterResource;
 use crate::model::cluster::status::PveClusterStatus;
-use crate::model::{PveResourceType, PveResponse};
+use crate::model::cluster::PveResourceType;
+use crate::model::PveResponse;
 use reqwest::{Client, StatusCode, Url};
 use serde_json::Value;
 use std::sync::Arc;
