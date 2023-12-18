@@ -24,7 +24,7 @@ impl Tasks {
     }
 
     /// Read task status.
-    pub async fn status(&self, upid: impl Into<String>) -> Result<model::node::tasks::TaskStatus> {
+    pub async fn status(&self, upid: impl Into<&str>) -> Result<model::node::tasks::TaskStatus> {
         let upid = upid.into();
         let url = self
             .host

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Debug)]
-pub struct GetTasksFilter {
+pub struct TasksFilter {
     #[serde(rename = "errors")]
     pub only_errors: Option<bool>, // Only list tasks with a status of ERROR.
     pub limit: Option<u64>,         // Only list this amount of tasks.
@@ -27,7 +27,7 @@ pub struct GetTasksFilter {
     pub vmid: Option<u64>,          // Only list tasks for this VM.
 }
 
-impl Default for GetTasksFilter {
+impl Default for TasksFilter {
     fn default() -> Self {
         Self {
             only_errors: Some(false),

@@ -392,15 +392,17 @@ impl PveNode {
     ///
     /// You can apply a filter like this:
     /// ```
-    /// node.tasks(filter: Some(GetTasksFilter {
-    ///     only_errors: Some(true),
+    /// let filter = TasksFilter {
+    ///     only_erros: Some(true),
     ///     ..Default::default()
-    /// }));
+    /// };
+    ///
+    /// node.tasks(Some(filter));
     /// ```
     ///
     pub async fn tasks(
         &self,
-        filter: Option<model::node::tasks::GetTasksFilter>,
+        filter: Option<model::node::tasks::TasksFilter>,
     ) -> Result<Vec<model::node::tasks::Task>> {
         let url = self
             .host
@@ -434,7 +436,12 @@ impl PveNode {
         Ok(PveResponse::from_response(response).await?.data)
     }
 
-    pub fn lxc(&self, id: VMId) -> PveLXC {
-        PveLXC::new(self.id.clone(), id, self.host.clone(), self.client.clone())
+    pub fn lxc(&self, id: impl Into<VMId>) -> PveLXC {
+        PveLXC::new(
+            self.id.clone(),
+            id.into(),
+            self.host.clone(),
+            self.client.clone(),
+        )
     }
 }

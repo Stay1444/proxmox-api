@@ -2,6 +2,9 @@ use serde::Deserialize;
 
 use super::VMId;
 
+pub mod config;
+pub mod interfaces;
+
 #[derive(Deserialize, Debug)]
 pub struct LXC {
     pub status: LXCStatus,
