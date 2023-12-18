@@ -1,10 +1,11 @@
 use std::sync::Arc;
+use std::time::Duration;
 
 use reqwest::{Client, StatusCode, Url};
 
 use crate::error::{ProxmoxAPIError, Result};
-use crate::model;
 use crate::model::node::{NodeId, VMId};
+use crate::model::{self, Size};
 
 #[derive(Clone)]
 pub struct PveLXC {
@@ -70,7 +71,7 @@ impl PveLXC {
         let url = self
             .host
             .join(&format!(
-                "/api2/json/nodes/{}/lxc{}/resize",
+                "/api2/json/nodes/{}/lxc/{}/resize",
                 self.node_id, self.id
             ))
             .expect("Correct URL");
@@ -79,6 +80,50 @@ impl PveLXC {
             "disk": disk,
             "size": size.to_string(),
             "digest": digest
+        });
+
+        let response = self
+            .client
+            .post(url)
+            .json(&body)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        if !response.status().is_success() {
+            match response.status() {
+                StatusCode::UNAUTHORIZED => return Err(ProxmoxAPIError::Unauthorized),
+                status => return Err(ProxmoxAPIError::ApiError(status)),
+            }
+        }
+
+        Ok(())
+    }
+
+    pub async fn migrate(
+        &self,
+        target: NodeId,
+        bandwidth_limit: Option<Size>,
+        online: bool,
+        restart: bool,
+        target_storage: Option<impl Into<String>>,
+        timeout: Option<Duration>,
+    ) -> Result<()> {
+        let url = self
+            .host
+            .join(&format!(
+                "/api2/json/nodes/{}/lxc/{}/migrate",
+                self.node_id, self.id
+            ))
+            .expect("Correct URL");
+
+        let body = serde_json::json!({
+            "target": target.0,
+            "bwlimit": bandwidth_limit.map(|x| x.to_kb()),
+            "online": online,
+            "restart": restart,
+            "target-storage": target_storage.map(|x| x.into()),
+            "timeout": timeout.map(|x| x.as_secs())
         });
 
         let response = self

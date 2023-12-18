@@ -58,13 +58,13 @@ pub enum PveConsoleViewer {
     XTermJS,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum Size {
-    TB(f32),
-    GB(f32),
-    MB(f32),
-    KB(f32),
-    B(i64),
+    TB(f64),
+    GB(f64),
+    MB(f64),
+    KB(f64),
+    B(u64),
 }
 
 impl ToString for Size {
@@ -76,5 +76,117 @@ impl ToString for Size {
             Size::KB(q) => format!("{q}K"),
             Size::B(q) => format!("{q}"),
         }
+    }
+}
+
+impl Size {
+    pub fn to_tb(&self) -> f64 {
+        match self {
+            Size::TB(q) => *q,
+            Size::GB(q) => *q / 1024.,
+            Size::MB(q) => *q / 1024. / 1024.,
+            Size::KB(q) => *q / 1024. / 1024. / 1024.,
+            Size::B(q) => *q as f64 / 1024. / 1024. / 1024. / 1024.,
+        }
+    }
+
+    pub fn to_gb(&self) -> f64 {
+        match self {
+            Size::TB(q) => *q * 1024.,
+            Size::GB(q) => *q,
+            Size::MB(q) => *q / 1024.,
+            Size::KB(q) => *q / 1024. / 1024.,
+            Size::B(q) => *q as f64 / 1024.0 / 1024.0 / 1024.0,
+        }
+    }
+
+    pub fn to_mb(&self) -> f64 {
+        match self {
+            Size::TB(q) => *q * 1024. * 1024.,
+            Size::GB(q) => *q * 1024.,
+            Size::MB(q) => *q,
+            Size::KB(q) => *q / 1024.,
+            Size::B(q) => *q as f64 / 1024. / 1024.,
+        }
+    }
+
+    pub fn to_kb(&self) -> f64 {
+        match self {
+            Size::TB(q) => *q * 1024. * 1024. * 1024.,
+            Size::GB(q) => *q * 1024. * 1024.,
+            Size::MB(q) => *q * 1024.,
+            Size::KB(q) => *q,
+            Size::B(q) => *q as f64 / 1024.,
+        }
+    }
+
+    pub fn to_bytes(&self) -> u64 {
+        match self {
+            Size::TB(q) => (*q * 1024. * 1024. * 1024. * 1024.) as u64,
+            Size::GB(q) => (*q * 1024. * 1024. * 1024.) as u64,
+            Size::MB(q) => (*q * 1024. * 1024.) as u64,
+            Size::KB(q) => (*q * 1024.) as u64,
+            Size::B(q) => *q,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Size;
+
+    #[test]
+    pub fn test_size_tb() {
+        let size = Size::TB(1.0);
+
+        assert_eq!(size.to_tb(), 1.0);
+        assert_eq!(size.to_gb(), 1024.0);
+        assert_eq!(size.to_mb(), 1048576.0);
+        assert_eq!(size.to_kb(), 1073741824.0);
+        assert_eq!(size.to_bytes(), 1099511627776);
+    }
+
+    #[test]
+    pub fn test_size_gb() {
+        let size = Size::GB(1.0);
+
+        assert_eq!(size.to_tb(), 0.0009765625);
+        assert_eq!(size.to_gb(), 1.0);
+        assert_eq!(size.to_mb(), 1024.0);
+        assert_eq!(size.to_kb(), 1048576.0);
+        assert_eq!(size.to_bytes(), 1073741824);
+    }
+
+    #[test]
+    pub fn test_size_mb() {
+        let size = Size::MB(1.0);
+
+        assert_eq!(size.to_tb(), 0.00000095367431640625);
+        assert_eq!(size.to_gb(), 0.0009765625);
+        assert_eq!(size.to_mb(), 1.0);
+        assert_eq!(size.to_kb(), 1024.0);
+        assert_eq!(size.to_bytes(), 1048576);
+    }
+
+    #[test]
+    pub fn test_size_kb() {
+        let size = Size::KB(1.0);
+
+        assert_eq!(size.to_tb(), 0.0000000009313225746154785);
+        assert_eq!(size.to_gb(), 0.00000095367431640625);
+        assert_eq!(size.to_mb(), 0.0009765625);
+        assert_eq!(size.to_kb(), 1.0);
+        assert_eq!(size.to_bytes(), 1024);
+    }
+
+    #[test]
+    pub fn test_size_bytes() {
+        let size = Size::B(1);
+
+        assert_eq!(size.to_tb(), 0.0000000000009094947017729282);
+        assert_eq!(size.to_gb(), 0.0000000009313225746154785);
+        assert_eq!(size.to_mb(), 0.00000095367431640625);
+        assert_eq!(size.to_kb(), 0.0009765625);
+        assert_eq!(size.to_bytes(), 1);
     }
 }
