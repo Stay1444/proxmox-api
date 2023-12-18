@@ -20,5 +20,7 @@ async fn main() {
 
     let node = client.node("avc01");
 
-    dbg!(node.lxcs().await);
+    let docs = node.lxc("115");
+
+    dbg!(docs.interfaces().await);
 }

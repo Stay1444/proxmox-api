@@ -49,13 +49,40 @@ pub struct PveVersion {
     pub console: Option<PveConsoleViewer>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum PveConsoleViewer {
     Applet,
     VV,
     Html5,
     XTermJS,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
+#[serde(rename_all = "lowercase")]
+pub enum Architecture {
+    Amd64,
+    I386,
+    Arm64,
+    ArmHF,
+    RiscV32,
+    RiscV64,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
+#[serde(rename_all = "lowercase")]
+pub enum OSType {
+    Debian,
+    Devuan,
+    Ubuntu,
+    CentOS,
+    Fedora,
+    OpenSUSE,
+    ArchLinux,
+    Alpine,
+    Gentoo,
+    NixOS,
+    Unmanaged,
 }
 
 #[derive(Clone, Copy, PartialEq)]

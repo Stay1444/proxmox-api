@@ -5,7 +5,7 @@ use reqwest::{Client, StatusCode, Url};
 
 use crate::error::{ProxmoxAPIError, Result};
 use crate::model::node::{NodeId, VMId};
-use crate::model::{self, Size};
+use crate::model::{self, PveResponse, Size};
 
 #[derive(Clone)]
 pub struct PveLXC {
@@ -33,6 +33,7 @@ impl PveLXC {
         self.node_id.clone()
     }
 
+    /// Create a Template.
     pub async fn template(&self) -> Result<()> {
         let url = self
             .host
@@ -59,14 +60,23 @@ impl PveLXC {
         Ok(())
     }
 
+    /// Resize a container mount point. Shrinking not supported.
+    /// * `size` - The target size
+    /// * `additive` - Add the size to the actual size
+    /// * `disk` - The disk you want to resize.
+    /// * `digest` - Prevent changes if current configuration file has different SHA1 digest. This can be used to prevent concurrent modifications.
+    /// ```
+    /// // Adds 256 GB
+    /// lxc.resize(Size::GB(256.0), true, "rootfs", None);
+    /// ```
     pub async fn resize(
         &self,
         size: model::Size,
-        disk: impl Into<String>,
-        digest: Option<impl Into<String>>,
+        additive: bool,
+        disk: impl Into<&str>,
+        digest: Option<&str>,
     ) -> Result<()> {
         let disk = disk.into();
-        let digest = digest.map(|x| x.into());
 
         let url = self
             .host
@@ -75,6 +85,12 @@ impl PveLXC {
                 self.node_id, self.id
             ))
             .expect("Correct URL");
+
+        let size = if !additive {
+            size.to_string()
+        } else {
+            format!("+{}", size.to_string())
+        };
 
         let body = serde_json::json!({
             "disk": disk,
@@ -100,13 +116,25 @@ impl PveLXC {
         Ok(())
     }
 
+    /// Migrate the container to another node. Creates a new migration task.
+    /// * `target` - The cluster node name.
+    /// * `bandwidth_limit` - Override I/O bandwidth limit.
+    /// * `online` - Use online/live migration.
+    /// * `restart` - Use restart migration
+    /// * `target_storage` - Mapping from source to target storages. Providing only a single storage ID maps all source storages to that storage. Providing the special value '1' will map each source storage to itself.
+    /// * `timeout` - Timeout in seconds for shutdown for restart migration
+    ///
+    /// Example:
+    /// ```
+    /// lxc.migrate("pve01", None, true, false, None, None)
+    /// ```
     pub async fn migrate(
         &self,
         target: NodeId,
         bandwidth_limit: Option<Size>,
         online: bool,
         restart: bool,
-        target_storage: Option<impl Into<String>>,
+        target_storage: Option<&str>,
         timeout: Option<Duration>,
     ) -> Result<()> {
         let url = self
@@ -122,7 +150,7 @@ impl PveLXC {
             "bwlimit": bandwidth_limit.map(|x| x.to_kb()),
             "online": online,
             "restart": restart,
-            "target-storage": target_storage.map(|x| x.into()),
+            "target-storage": target_storage,
             "timeout": timeout.map(|x| x.as_secs())
         });
 
@@ -142,5 +170,59 @@ impl PveLXC {
         }
 
         Ok(())
+    }
+
+    /// Get IP addresses of the specified container interface.
+    pub async fn interfaces(&self) -> Result<Vec<model::node::lxc::interfaces::Interface>> {
+        let url = self
+            .host
+            .join(&format!(
+                "/api2/json/nodes/{}/lxc/{}/interfaces",
+                self.node_id, self.id
+            ))
+            .expect("Correct URL");
+
+        let response = self
+            .client
+            .get(url)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        Ok(PveResponse::from_response(response).await?.data)
+    }
+
+    /// Get container configuration.
+    /// * `current` - Get current values (instead of pending values).
+    /// * `snapshot` - Fetch config values from given snapshot.
+    /// ```
+    /// lxc.config(true, None);
+    pub async fn config(
+        &self,
+        current: bool,
+        snapshot: Option<&str>,
+    ) -> Result<model::node::lxc::config::LXCConfiguration> {
+        let url = self
+            .host
+            .join(&format!(
+                "/api2/json/nodes/{}/lxc/{}/config",
+                self.node_id, self.id
+            ))
+            .expect("Correct URL");
+
+        let body = serde_json::json!({
+            "current": current,
+            "snapshot": snapshot
+        });
+
+        let response = self
+            .client
+            .get(url)
+            .json(&body)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        Ok(PveResponse::from_response(response).await?.data)
     }
 }
