@@ -58,10 +58,23 @@ pub enum PveConsoleViewer {
     XTermJS,
 }
 
+#[derive(Clone, PartialEq)]
 pub enum Size {
-    TB(i64),
-    GB(i64),
-    MB(i64),
-    KB(i64),
+    TB(f32),
+    GB(f32),
+    MB(f32),
+    KB(f32),
     B(i64),
+}
+
+impl ToString for Size {
+    fn to_string(&self) -> String {
+        match self {
+            Size::TB(q) => format!("{q}T"),
+            Size::GB(q) => format!("{q}G"),
+            Size::MB(q) => format!("{q}M"),
+            Size::KB(q) => format!("{q}K"),
+            Size::B(q) => format!("{q}"),
+        }
+    }
 }
