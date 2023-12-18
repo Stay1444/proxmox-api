@@ -26,8 +26,9 @@ impl VZDump {
     /// API version details
     pub async fn defaults(
         &self,
-        storage_identifier: Option<String>,
+        storage_identifier: Option<impl Into<String>>,
     ) -> Result<model::node::vzdump::defaults::ConfiguredDefaults> {
+        let storage_identifier = storage_identifier.map(|x| x.into());
         let url = self
             .host
             .join(&format!("/api2/json/nodes/{}/vzdump/defaults", self.id))
