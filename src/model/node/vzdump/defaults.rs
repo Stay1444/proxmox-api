@@ -1,5 +1,7 @@
 use serde::Deserialize;
 
+use crate::model::node::{NodeId, VMId};
+
 #[derive(Deserialize, Debug)]
 pub struct ConfiguredDefaults {
     pub all: bool,             // Backup all known guest systems on this host.
@@ -20,8 +22,8 @@ pub struct ConfiguredDefaults {
     #[serde(default)]
     pub maxfiles: Option<i32>, // Deprecated: use 'prune-backups' instead. Maximal number of backup files per guest system.
     pub mode: Mode, // Backup mode.
-    #[serde(default, deserialize_with = "crate::deserializers::non_empty_str")]
-    pub node: Option<String>, // Only run if executed on this node.
+    #[serde(default, deserialize_with = "crate::deserializers::non_empty_nodeid")]
+    pub node: Option<NodeId>, // Only run if executed on this node.
     #[serde(
         default,
         rename = "notes-template",
@@ -59,8 +61,8 @@ pub struct ConfiguredDefaults {
     pub storage: Option<String>, // Store resulting file to this storage.
     #[serde(default, deserialize_with = "crate::deserializers::non_empty_str")]
     pub tmpdir: Option<String>, // Store temporary files to specified directory.
-    #[serde(default, deserialize_with = "crate::deserializers::non_empty_str")]
-    pub vmid: Option<String>, // The ID of the guest system you want to backup.
+    #[serde(default, deserialize_with = "crate::deserializers::non_empty_vmid")]
+    pub vmid: Option<VMId>, // The ID of the guest system you want to backup.
     pub zstd: i32, // Zstd threads. N=0 uses half of the available cores, N>0 uses N as thread count.
 }
 

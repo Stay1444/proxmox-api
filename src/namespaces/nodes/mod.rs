@@ -4,9 +4,16 @@ use reqwest::{Client, StatusCode, Url};
 
 use crate::{
     error::{ProxmoxAPIError, Result},
-    model::{self, node::NodeId, PveResponse, PveVersion},
+    model::{
+        self,
+        node::{NodeId, VMId},
+        PveResponse, PveVersion,
+    },
 };
 
+use self::lxc::PveLXC;
+
+mod lxc;
 mod tasks;
 mod vzdump;
 
@@ -425,5 +432,9 @@ impl PveNode {
             .map_err(|_| ProxmoxAPIError::NetworkError)?;
 
         Ok(PveResponse::from_response(response).await?.data)
+    }
+
+    pub fn lxc(&self, id: VMId) -> PveLXC {
+        PveLXC::new(self.id.clone(), id, self.host.clone(), self.client.clone())
     }
 }

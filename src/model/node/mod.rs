@@ -18,7 +18,7 @@ pub mod vzdump;
 #[derive(Deserialize, Debug)]
 pub struct PveNodeInformation {
     #[serde(rename = "node")]
-    pub id: String,
+    pub id: NodeId,
     pub status: NodeStatus,
     #[serde(default)]
     pub cpu: Option<f64>,
@@ -54,7 +54,8 @@ impl Display for NodeStatus {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize)]
+#[serde(transparent)]
 pub struct NodeId(pub(crate) String);
 
 impl NodeId {
@@ -75,6 +76,14 @@ impl std::fmt::Display for NodeId {
     }
 }
 
+impl From<String> for NodeId {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize)]
+#[serde(transparent)]
 pub struct VMId(pub(crate) String);
 
 impl VMId {
@@ -92,5 +101,11 @@ impl From<&str> for VMId {
 impl std::fmt::Display for VMId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(self.0.as_str())
+    }
+}
+
+impl From<String> for VMId {
+    fn from(value: String) -> Self {
+        Self(value)
     }
 }

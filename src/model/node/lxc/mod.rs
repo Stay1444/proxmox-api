@@ -1,9 +1,11 @@
 use serde::Deserialize;
 
+use super::VMId;
+
 #[derive(Deserialize, Debug)]
 pub struct LXC {
     pub status: LXCStatus,
-    pub vmid: String,
+    pub vmid: VMId,
 
     #[serde(default)]
     pub cpus: Option<f64>,
