@@ -5,6 +5,7 @@ use super::VMId;
 pub mod clone;
 pub mod config;
 pub mod interfaces;
+pub mod status;
 
 #[derive(Deserialize, Debug)]
 pub struct LXC {

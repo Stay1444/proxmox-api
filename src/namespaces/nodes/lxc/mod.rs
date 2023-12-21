@@ -7,12 +7,15 @@ use crate::error::{ProxmoxAPIError, Result};
 use crate::model::node::{NodeId, VMId};
 use crate::model::{self, PveResponse, Size};
 
+mod status;
+
 #[derive(Clone)]
 pub struct PveLXC {
     node_id: NodeId,
     id: VMId,
     host: Arc<Url>,
     client: Client,
+    pub status: status::PveLXCStatus,
 }
 
 impl PveLXC {
@@ -22,6 +25,12 @@ impl PveLXC {
             node_id: node_id.clone(),
             host: host.clone(),
             client: client.clone(),
+            status: status::PveLXCStatus::new(
+                node_id.clone(),
+                id.clone(),
+                host.clone(),
+                client.clone(),
+            ),
         }
     }
 
