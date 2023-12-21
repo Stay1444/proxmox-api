@@ -85,7 +85,7 @@ pub enum OSType {
     Unmanaged,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Size {
     TB(f64),
     GB(f64),

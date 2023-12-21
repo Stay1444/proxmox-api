@@ -18,9 +18,13 @@ async fn main() {
 
     let client = ProxmoxClient::new("https://172.10.0.2:8006".parse().unwrap(), auth);
 
-    let node = client.node("avc01");
+    for node in client.nodes().await.unwrap() {
+        println!("Listing LXCs for node {}", node.id);
 
-    let docs = node.lxc("115");
+        let node = client.node(node.id);
 
-    dbg!(docs.interfaces().await);
+        for lxc in node.lxcs().await.unwrap() {
+            println!("{}: {}", lxc.vmid, lxc.name.unwrap());
+        }
+    }
 }

@@ -2,6 +2,7 @@ use serde::Deserialize;
 
 use super::VMId;
 
+pub mod clone;
 pub mod config;
 pub mod interfaces;
 

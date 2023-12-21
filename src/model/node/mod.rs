@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 pub mod aplinfo;
 pub mod config;
@@ -54,7 +54,7 @@ impl Display for NodeStatus {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct NodeId(pub(crate) String);
 
@@ -82,7 +82,7 @@ impl From<String> for NodeId {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct VMId(pub(crate) String);
 

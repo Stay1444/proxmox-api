@@ -225,4 +225,53 @@ impl PveLXC {
 
         Ok(PveResponse::from_response(response).await?.data)
     }
+
+    /// Create a container clone/copy
+    /// ```
+    /// lxc.clone(Parameters {
+    ///     new_id: VMId("200".into()),
+    ///     ..Default::default()
+    /// })
+    /// ```
+    pub async fn clone<'a>(
+        &self,
+        parameters: model::node::lxc::clone::Parameters<'a>,
+    ) -> Result<()> {
+        let url = self
+            .host
+            .join(&format!(
+                "/api2/json/nodes/{}/lxc/{}/clone",
+                self.node_id, self.id
+            ))
+            .expect("Correct URL");
+
+        let body = serde_json::json!({
+            "newid": parameters.new_id,
+            "bwlimit": parameters.bandwidth_limit.map(|x| x.to_kb()),
+            "description": parameters.description,
+            "full": parameters.full,
+            "hostname": parameters.hostname,
+            "pool": parameters.pool,
+            "snapname": parameters.snapname,
+            "storage": parameters.storage,
+            "target": parameters.target
+        });
+
+        let response = self
+            .client
+            .post(url)
+            .json(&body)
+            .send()
+            .await
+            .map_err(|_| ProxmoxAPIError::NetworkError)?;
+
+        if !response.status().is_success() {
+            match response.status() {
+                StatusCode::UNAUTHORIZED => return Err(ProxmoxAPIError::Unauthorized),
+                status => return Err(ProxmoxAPIError::ApiError(status)),
+            }
+        }
+
+        Ok(())
+    }
 }
